@@ -1,6 +1,4 @@
 import puppeteer, { Page } from "puppeteer";
-import { GoogleSpreadsheet } from "google-spreadsheet";
-import { JWT } from "google-auth-library";
 
 import { FishDoc } from "./sheet";
 
@@ -15,6 +13,7 @@ import { FishDoc } from "./sheet";
 
 async function scrapeFishDetails(page: Page, url: string) {
   await page.goto(url);
+
   const fishInfoSelector = ".fish-info";
 
   await page.waitForSelector(fishInfoSelector);
@@ -47,7 +46,9 @@ const searchFish = async (): Promise<any[]> => {
   try {
     const browser = await puppeteer.launch();
     const page: Page = await browser.newPage();
-    // page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
+
+    // Enable console logging
+    page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
 
     await page.goto(url, { waitUntil: "domcontentloaded" });
     await page.setViewport({ width: 1080, height: 1024 });
@@ -68,7 +69,7 @@ const searchFish = async (): Promise<any[]> => {
 
       // Scrape the fish details in the new page
       const details = await scrapeFishDetails(detailPage, detailsUrl);
-      let fishInfo = { name, ...details };
+      let fishInfo = { Name: name, ...details };
       fishArray.push(fishInfo);
 
       // Close the details page
@@ -93,6 +94,7 @@ searchFish().then(async (fishArray) => {
     const sheet = FishDoc.sheetsByIndex[0];
 
     for (const fish of fishArray) {
+      console.log("Writing fish:", fish.name);
       await sheet.addRow(fish);
     }
   } catch (error) {
