@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "fetch:fish": "ts-node src/scraper/fish_search.ts",
-    "save:fish": "ts-node src/generator/save_fish.ts"
+    "save:fish": "ts-node src/generator/save_fish.ts",
+    "render:fish": "ts-node src/generator/present_fish.ts"
   },
   "author": "",
   "license": "ISC",
