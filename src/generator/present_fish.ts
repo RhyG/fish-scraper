@@ -50,7 +50,7 @@ h1 {
 </style>
 </head>
 <body>
-<h1>Fish Catalog</h1>
+<h1>Fish</h1>
 <div id="catalog">
 `;
 
