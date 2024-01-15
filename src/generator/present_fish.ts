@@ -99,7 +99,7 @@ h1 {
 </html>
 `;
 
-  fs.writeFileSync("fishCatalog.html", htmlContent);
+  fs.writeFileSync("index.html", htmlContent);
 
   console.log("Written to file.");
 })();
