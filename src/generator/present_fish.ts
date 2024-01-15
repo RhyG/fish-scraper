@@ -16,12 +16,19 @@ body {
 }
 #catalog {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* Creates exactly four columns */
+  grid-template-columns: repeat(4, 1fr); /* Default to four columns */
   gap: 10px;
   justify-content: center;
-  align-items: start; /* Aligns items to the start of the grid area */
+  align-items: start;
   max-width: 1024px;
   margin: auto;
+}
+
+/* Media query for screens that are 768px wide or less */
+@media (max-width: 1000px) {
+  #catalog {
+    grid-template-columns: repeat(3, 1fr); /* Switch to three columns for mobile devices */
+  }
 }
 
 .tile {
@@ -33,12 +40,12 @@ body {
   text-align: left;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Aligns content to the start inside the tile */
+  align-items: flex-start;
 }
 
 .tile strong {
   display: block;
-  margin-top: 0.8em;
+  margin-bottom: 0.5em; /* Adds spacing between each key-value pair */
 }
 
 .tile:hover {
