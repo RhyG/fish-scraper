@@ -6,7 +6,7 @@ let htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
-<title>Fish Catalog</title>
+<title>Fish</title>
 <style>
 body {
   font-family: Arial, sans-serif;
