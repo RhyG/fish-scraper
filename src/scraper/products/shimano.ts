@@ -2,15 +2,17 @@ import puppeteer, { Page } from "puppeteer";
 import { FishDoc } from "../../sheet";
 
 const product_categories = [
-  "https://fish.shimano.com/en-AU/product/lures/hardbody.html",
-  "https://fish.shimano.com/en-AU/product/lures/jigginglures.html",
-  "https://fish.shimano.com/en-AU/product/lures/squidjigs.html",
-  "https://fish.shimano.com/en-AU/product/lures/softplastics.html",
-  "https://fish.shimano.com/en-AU/product/lures/stickbaits.html",
+  // "https://fish.shimano.com/en-AU/product/lures/hardbody.html",
+  // "https://fish.shimano.com/en-AU/product/lures/jigginglures.html",
+  // "https://fish.shimano.com/en-AU/product/lures/squidjigs.html",
+  // "https://fish.shimano.com/en-AU/product/lures/softplastics.html",
+  // "https://fish.shimano.com/en-AU/product/lures/stickbaits.html",
   "https://fish.shimano.com/en-AU/product/lures/poppers.html",
 ];
 
 const productData = {};
+
+const productsWithCategories: Record<string, { [key: string]: unknown }> = {};
 
 // Instantiate document
 (async function () {
@@ -24,6 +26,9 @@ const productData = {};
 
 async function scrapeProds(url: string) {
   console.log("Scraping URL", url);
+  const category = url.split("/")[5].toUpperCase();
+  productsWithCategories[category] = {};
+
   try {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -38,12 +43,10 @@ async function scrapeProds(url: string) {
 
     console.log(`Got ${products.length} products`);
 
-    let specsArray = [];
-
     for (const product of products) {
       // @ts-ignore
       const title = await product.$eval(".thumbnail__title", (e) => e?.innerText);
-      // console.log(title.trim());
+      productsWithCategories[category][title] = [];
 
       const href = await product.$eval("a", (e) => e?.href);
       // console.log("Got href:", `${href}#specification`);
@@ -59,12 +62,30 @@ async function scrapeProds(url: string) {
       //   ths.map((th) => th.innerText.trim())
       // );
 
-      // Extracting row data
+      // Extracting row data IN TRADITIONAL KEY:VALUE SENSE
+      // const rowData = await detailPage.evaluate(() => {
+      //   const data: any[] = [];
+      //   const rows = document.querySelectorAll(".spec-table__tbody tr");
+      //   rows.forEach((row) => {
+      //     // console.log("Got row:", row);
+      //     const rowObj = {};
+      //     const cells = row.querySelectorAll("td");
+      //     cells.forEach((cell, index) => {
+      //       // Assuming headers is available in this scope, else fetch similarly
+      //       // @ts-ignore
+      //       const header = document.querySelectorAll(".spec-table__thead--original th p")[index].innerText.trim();
+      //       // @ts-ignore
+      //       rowObj[header] = cell.innerText.trim();
+      //     });
+      //     data.push(rowObj);
+      //   });
+      //   return data;
+      // });
+
       const rowData = await detailPage.evaluate(() => {
         const data: any[] = [];
         const rows = document.querySelectorAll(".spec-table__tbody tr");
         rows.forEach((row) => {
-          // console.log("Got row:", row);
           const rowObj = {};
           const cells = row.querySelectorAll("td");
           cells.forEach((cell, index) => {
@@ -78,6 +99,22 @@ async function scrapeProds(url: string) {
         });
         return data;
       });
+
+      // @ts-ignore
+      // productsWithCategories[category][title].push(
+      //   // @ts-ignore
+      //   `${title} ${rowData["FULL LENGTH (MM)"]}mm - ${rowData["COLOR CODE"]} - ${rowData.COLOUR}}`
+      // );
+
+      for (const row of rowData) {
+        // @ts-ignore
+        productsWithCategories[category][title].push(
+          // @ts-ignore
+          `${title} ${row["FULL LENGTH (MM)"]}mm - ${row["COLOR CODE"]} - ${row.COLOUR}`
+        );
+      }
+      // console.log("GOT ROW DATA", rowData);
+      // console.log("Products with categories:", productsWithCategories);
 
       // @ts-ignore
       productData[title] = rowData;
@@ -97,13 +134,28 @@ async function scrapeProds(url: string) {
     await scrapeProds(category);
   }
 
-  try {
-    const sheet = FishDoc.sheetsByIndex[4];
+  // FOR TRADITIONAL SHEET WITH KEY:VALUE ROWS
+  // try {
+  //   const sheet = FishDoc.sheetsByIndex[4];
 
-    for (const [NAME, variants] of Object.entries(productData)) {
-      // @ts-ignore
-      for (const variant of variants) {
-        await sheet.addRow({ NAME, ...variant });
+  //   for (const [NAME, variants] of Object.entries(productData)) {
+  //     // @ts-ignore
+  //     for (const variant of variants) {
+  //       await sheet.addRow({ NAME, ...variant });
+  //       await new Promise((resolve) => setTimeout(resolve, 1000));
+  //     }
+  //   }
+  // } catch (error) {
+  //   console.log(error);
+  // }
+
+  try {
+    const sheet = FishDoc.sheetsByIndex[6];
+    console.log({ productsWithCategories });
+    for (const [_, variants] of Object.entries(productsWithCategories)) {
+      await sheet.setHeaderRow(Object.keys(variants));
+      for (const [variant, things] of Object.entries(variants)) {
+        await sheet.addRow({ [variant]: (things as string[]).join("\n\n") });
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
