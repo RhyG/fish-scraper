@@ -8,6 +8,12 @@
     "fetch:fish": "ts-node src/scraper/fish_search.ts",
     "save:fish": "ts-node src/generator/save_fish.ts",
     "render:fish": "ts-node src/generator/present_fish.ts",
+    "scrape:shimano": "ts-node src/scraper/products/shimano.ts",
+    "scrape:daiwa": "ts-node src/scraper/products/daiwa.ts",
+    "scrape:penn": "ts-node src/scraper/products/penn.ts",
+    "scrape:berkley": "ts-node src/scraper/products/berkley.ts",
+    "scrape:abu": "ts-node src/scraper/products/abu-garcia.ts",
+    "scrape:jarvis": "ts-node src/scraper/products/jarvis-walker.ts",
     "scrape": "ts-node src/scraper/run.ts"
   },
   "author": "",
