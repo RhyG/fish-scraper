@@ -30,17 +30,17 @@ async function scrapeLures() {
     // Selector for most products
     // const products = await page.$$(".col.medium-4.small-6.large-3");
 
-    const products = await page.$$(".product-small");
+    const products = await page.$$("li.contentframe");
 
     console.log("Got products", products.length);
 
-    for (const product of [1]) {
-      // const href = await product.$eval("a", (e) => e?.href);
+    for (const product of products) {
+      const href = await product.$eval("a", (e) => e?.href);
 
       const detailPage = await browser.newPage();
-      await detailPage.goto("https://berkley-fishing.com.au/product/berkley-skid-jig/", { waitUntil: "networkidle2" });
+      await detailPage.goto(href, { waitUntil: "networkidle2" });
 
-      const table = await detailPage.waitForSelector(".tablepress");
+      const table = await detailPage.waitForSelector("table");
 
       // Extract the headers
       // @ts-ignore
@@ -77,3 +77,5 @@ async function scrapeLures() {
 
   return completed;
 }
+
+scrapeLures();
